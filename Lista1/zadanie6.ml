@@ -3,7 +3,7 @@ let ctrue = fun x -> fun y -> if true then x else y;;
 let cfalse = fun x -> fun y -> if false then x else y;;
 
 let ctrue = fun x y -> x;;
-let cfalse = fun x y -> false;;
+let cfalse = fun x y -> y;;
 let cbool_of_bool value = if value then ctrue else cfalse ;;
 let bool_of_cbool value = if value(true)(false) = true then true else false;;
 (*
