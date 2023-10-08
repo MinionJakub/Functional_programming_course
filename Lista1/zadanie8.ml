@@ -12,11 +12,22 @@ type cbool = {cbool : 'a. 'a -> 'a -> 'a};;
 let ctrue : cbool = {cbool = fun x -> fun y -> if true then x else y};;
 let cfalse : cbool = {cbool = fun x -> fun y -> if false then x else y};;
 
+let ctrue : cbool = {cbool = fun x -> fun y -> x};;
+let cfalse : cbool = {cbool = fun x -> fun y -> y};;
+
+(*
 let cand (val1 : cbool) (val2 : cbool) : cbool  = 
 {cbool = if val1 == ctrue && val1 == val2 then val1.cbool else cfalse.cbool};;
+*)
 
+let cand (val1 : cbool) (val2 : cbool) : cbool = val1 (val2 ctrue cfalse) cfalse;;
+
+(*
 let cor (val1 : cbool) (val2 : cbool) : cbool =
 {cbool = if val1 == ctrue then val1.cbool else val2.cbool};;
+*)
+
+let cor (val1 : cbool) (val2 : cbool) : cbool = val1 ctrue (val2 ctrue cfalse);;
 
 let bool_of_cbool (value : cbool) : bool = ((value.cbool true false) = true);;
 
