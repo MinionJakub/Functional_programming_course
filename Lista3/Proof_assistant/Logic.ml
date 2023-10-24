@@ -1,16 +1,16 @@
 type formula =
-| False
+| Neg
 | Variable of string
 | Implication of formula * formula
 
 let rec string_of_formula f =
   match f with 
-  | False -> "⊥"
+  | Neg -> "⊥"
   | Variable a -> a
   | Implication(a,b) ->
     (
       match a with 
-      | False -> String.cat  "⊥ → " (string_of_formula b)
+      | Neg -> String.cat  "⊥ → " (string_of_formula b)
       | Variable a -> String.cat a (String.cat " → " (string_of_formula b))
       | Implication (_,_) -> String.cat (String.cat "(" (String.cat (string_of_formula a) ")")) 
       (String.cat " → " (string_of_formula b))
@@ -19,15 +19,31 @@ let rec string_of_formula f =
 let pp_print_formula fmtr f =
   Format.pp_print_string fmtr (string_of_formula f)
 
-type theorem (* = TODO: tu wpisz swoją definicję *)
+type theorem =
+| Assumption of formula list * formula
+| ImplI of theorem * formula list * formula
+| ImplE of theorem * theorem * formula list * formula
+| BotE of theorem * formula list * formula
+(* = TODO: tu wpisz swoją definicję *)
 
-let assumptions thm =
-  (* TODO: zaimplementuj *)
-  failwith "not implemented"
 
-let consequence thm =
-  (* TODO: zaimplementuj *)
-  failwith "not implemented"
+let rec assumptions thm =
+  match thm with 
+  | Assumption (fl,f) -> []
+  | ImplI (t,fl,f) -> List.append (assumptions t) fl
+  | ImplE (t1,t2,fl,f) -> List.append fl (List.append (assumptions t1) (assumptions t2))
+  | BotE (t,fl,f) -> List.append (assumptions t) fl
+
+
+
+
+let rec consequence thm =
+  match thm with 
+  | Assumption (fl,f) -> f
+  | ImplI (t,fl,f) -> f
+  | ImplE (t1,t2,fl,f) -> f
+  | BotE (t,fl,f) -> f
+
 
 let pp_print_theorem fmtr thm =
   let open Format in
@@ -50,17 +66,15 @@ let pp_print_theorem fmtr thm =
   pp_close_box fmtr ()
 
 let by_assumption f =
-  (* TODO: zaimplementuj *)
-  failwith "not implemented"
+  Assumption([f],f)
 
 let imp_i f thm =
-  (* TODO: zaimplementuj *)
-  failwith "not implemented"
+  ImplI(thm, assumptions(thm), Implication(f,consequence(thm)))
 
 let imp_e th1 th2 =
-  (* TODO: zaimplementuj *)
-  failwith "not implemented"
+  let x = consequence(th1) and y = consequence(th2) in match x,y with
+| Implication(a,b),_ ->  ImplE(th1,th2,List.append (assumptions th1) (assumptions th2),b)
+| _,_ -> failwith ";C"
 
 let bot_e f thm =
-  (* TODO: zaimplementuj *)
-  failwith "not implemented"
+  BotE(thm,assumptions(thm),f)
