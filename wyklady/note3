@@ -1,0 +1,55 @@
+begin
+(*cialo*)
+end
+
+
+równoważne z
+
+(
+    (*ciało*)
+)
+
+
+let rec select_min view t = 
+    match t with
+    | Leaf -> None
+    | Node(Leaf,x,r) -> Some(x,r)
+    | Node(node(l,x,m),y,r) -> select_min (Node(l,x,Node(m,y,r)))
+
+val select_min : t -> (int * t) option
+
+ocamlc -pack -o b.cmo a.cmo tree.cmo
+
+w *.mli
+module M : sig end <- dodawanie modułów do modułu trzeba pomiędy sig end dać sygnatury
+(*
+w *.ml
+
+module M 
+*)
+
+
+module N = Tree.m <- zwraca moduł
+
+funkcje na modułach
+
+module Id(M : sig end) = M;; <- funkcja na modułach 
+
+wywolanie funkcjami
+module M = Id(struct end);;
+module M = Id(List) ;;
+
+module Id = functor(M:sig end) -> M;;
+
+module Id(T : sig module type S end)(M: T.S) = M;;
+
+module M = Id(struct module type S = module type of List end)(List);;
+
+
+wywolanie modulo functora
+
+module IntTree = Tree.Make(Int);;
+
+
+module M(wyrazenie) = S with type elt = Elt.t;; <= pozwala na definiowanie typu i nadpisanie typu w module
+

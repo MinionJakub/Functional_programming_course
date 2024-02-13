@@ -1,0 +1,184 @@
+lista jednoelementowa
+[1,2,3] = [(1,2,3)]
+lista trójelementowa
+[1;2;3] = [1; 2; 3]
+
+cons == 1 :: [];; = [1]
+cons == 1 :: 2 :: [];; = [1; 2]
+
+infixowa wersja
+(::) (1,[]);;
+
+konstruktory nie są funkcjami w ocamlu
+
+funckja consa
+fun x xs -> x :: xs;;
+
+moduły z dużej litery
+dla przykładu:
+List
+użycie:
+List.cons 1 [2;3];;
+
+List.hd ;; (* head listy *)
+List.tl ;; (* tail listy *)
+
+List.hd czy List.tl od [] da error
+
+List.map == mapa
+List.rev_map == mapa oraz reverse
+
+List.map ((+) 1) [1;2;3] ;; == List.map (fun x -> x + 1) [1;2;3];;
+beta reduction
+
+List.append == (@)
+
+List.iter == iterator po liscie
+
+Printf.printf "%d\n" == wypisanie liczby
+List.iter (Printf.printf "%d\n") [1;2;3] <= wypisze elementy liczby
+
+List.fold_left;; <= fold na liście od początka do końca
+List.fold_right;; <= fold na liście od końca do początku
+
+suma elementów:
+List.fold_left (+) 0 [1;2;3];;
+List.fold_right (+) [1;2;3] 0;;
+
+let foo xs = List.fold_right List.cons xs [];; <= identyczność
+
+let rec fold_left f s xs = 
+    match xs with
+    | [] -> s
+    | x :: xs  -> fold_left f (f s x) xs ;;
+
+let rec sorted xs = 
+    match xs with
+    | [] -> true
+    | x :: [] -> true
+    | x :: (y :: xs) -> x <= y && sorted (y :: xs);;
+
+
+let rec sorted xs = 
+    match xs with
+    | [] -> true
+    | x :: [] -> true
+    | x :: ((y :: _) as xs) -> x <= y && sorted xs;;
+
+let rec sorted xs = 
+    match xs with
+    | [] -> true
+    | x :: [] -> true
+    | x :: ((y :: _) as xs) when x <= y -> sorted xs
+    | _ :: _ :: _ -> false;;
+
+
+List.find ;; <= gdy nie ma elementu zwraca exception
+
+List.find_opt ;; <= zwraca wartość nawet gdy nie ma elementu
+
+typ option ma dwa konstruktury Some i None
+
+jak używać some i none:
+
+let find_with_default p dft xs = 
+    match List.find_opt p xs with
+    | some x -> x
+    | None   -> dft;;
+
+definiowanie typów:
+
+type int_pair = int * int ;; <= alias typu
+
+type tree = 
+    | Leaf 
+    | Node of tree * tree   (* tutaj * służy jako konstruktur który ma dwa paremetry *)
+;;
+
+type tree = 
+    | Leaf
+    | Node of {left: tree;right : tree}
+;;
+
+type vec = {  <= rekord
+    x : int;
+    y : int
+}
+;;
+
+let f (x : vec) = vec.x;;
+
+type tree = 
+    | Leaf
+    | Node of tree * tree;;
+
+#use "tree.ml";; <= dziala glupio wpisuje wprost do pliku
+
+ocamlc -c tree.ml <= kompilacja
+
+utop tree.cmo
+
+wyrozniony typ w module (konwencja):
+type t = 
+    | Leaf
+    | Node of t * t;;
+
+
+
+type 'a t = 
+    | Leaf
+    | Nodeof 'a t * 'a * 'a t;;
+
+
+let rec add x t = 
+    math t with 
+        | Leaf -> Node(Leaf, x, Leaf)
+        | Node(l,y,r) -> if(x < y) then Node(add x l, y, r)
+            else Node(l,y,add x r);;
+
+let rec mem x t = 
+    match t with 
+    | Leaf -> false
+    | Node(_,y,_) when x = y -> true
+    | Node(l,y,_) when x < y -> mem x l
+    | Node(_,_,r) mem x r;;
+
+let empty = Leaf;;
+
+open Tree ;; <= po tym nie trzeba pisać tree.
+
+(* Dla wielu:
+
+type ('a, 'b) t = ... ;;  *)
+
+
+tworzenie interfejsów
+
+tree.mli
+
+(* type 'a t = 
+    | Leaf
+    | Node of 'a t * 'a * 'a t *) <= nadal widać konstruktory
+    
+type 'a t 
+val empty = 'a t
+val add : 'a -> 'a t -> 'a t
+val mem : 'a -> 'a t -> bool
+
+
+type 'a t = private 
+    | Leaf
+    | Nodeof 'a t * 'a * 'a t;; <= feature Ocamla
+
+type 'a view = 
+    | Leaf
+    | Node of 'a t * 'a * 'a t;;
+
+val view = ... ;;
+
+wtedy w .ml
+type 'a view = 
+    | Leaf
+    | Node of 'a t * 'a * 'a t and 'a t = a' view;;
+
+let view t = t;;

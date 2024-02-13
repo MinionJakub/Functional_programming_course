@@ -1,0 +1,87 @@
+unit -> string 
+read_line ;;
+
+opoznianie obliczen
+let f() = 2+2;;
+
+type 'a seq =
+unit -> 'a node 
+and 'a node = Nil | Cons of 'a * 'a seq;;
+
+let rec nats_from n = fun () -> Cons(n,nats_from(n+1));;
+
+jest moduł z typem seq jest to Seq
+
+open Seq
+
+let rec filter p xs = fun() -> 
+match  xs () with
+| Nil -> Nil
+| Cons(x,xs) when p x -> Cons(x,filter p xs)
+| Cons(_,xs) -> filter p xs ()
+
+let rec take_while p xs = fun () ->
+match xs () with
+| Cons(x,xs) when p x -> Cons(x, take_while p xs)
+| _ -> Nil
+
+let rec for_all p xs = 
+mach xs () with 
+| Nil -> true
+| Cons(x,xs) -> p x && for_all p xs
+
+
+let rec nth n xs =
+match xs () with
+| Nil -> raise Not_found
+| Cons(x,xs) -> 
+if n = 0 then x else nth (n-1) xs
+
+let rec nats_from n () = Cons(n,nats_from (n+1))
+
+let rec primes() = 
+Cons(2,filter is_prime (nats_from 3))
+and is_prime n = primes 
+|> take_while (fun p -> p*p <=n) 
+|> for_all (fun p -> n mod p <> 0) 
+
+let x = ref 42;;
+(!) ;; <- daje wartość z ref
+!x ;; 
+
+(:=) ;; <- nadpisuje wartość
+
+type 'a ref = {mutable contents : 'a};;
+
+let ref x = {contents : x};;
+let (!) x = x.contents;;
+let (:=) x y = x.contents <- y;;
+
+while !x > 0 do Printf.printf "%d\n" !x ; x := (!x - 1) done;;
+for x = 1 to 10 do Printf.printf "%d\n" x done ;;
+
+type 'a my_lazy = (unit -> 'a, 'a) Either.t ref;;
+let delay f = ref ( Either.Left f);;
+let force (x : 'a my_lazy) = 
+match !x with 
+| Left f -> let v = f () in x := Right v; v
+| Right v -> v
+
+GADT
+General Algebraic Data Type
+
+type _ typ = 
+| Int : int typ
+| Bool : bool typ
+| String : string typ
+| Pair : 'a typ * 'b typ -> ('a * 'b) typ
+| List : 'a typ -> 'a list typ
+
+let rec print : type a. a typ -> a -> string =
+fun ty x =
+match ty with 
+| Int -> string_of_int x
+| Bool -> string_of_bool x
+| String -> "\"" ^ String.escaped x ^ "\""
+| Pair(tp1,tp2) -> "(" ^ print tp1 (fst x) ^ "," ^ print tp2 (snd x) ^ ")"
+| List tp -> "[" ^ String.concat ...
