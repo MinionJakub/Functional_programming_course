@@ -1,6 +1,0 @@
-cat(tome).
-# cat(finio).
-animal(X) :- cat(X).
-
-
-
